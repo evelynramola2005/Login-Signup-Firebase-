@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="signup-container">
+    <h2>Sign Up</h2>
+    <form id="signup-form">
+      <input type="text" id="signup-name" placeholder="Full Name" required /><br />
+      <input type="email" id="signup-email" placeholder="Email" required /><br />
+      <input type="password" id="signup-password" placeholder="Password" required /><br />
+      <button type="submit">Sign Up</button>
+    </form>
+    <p id="signup-error-message"></p>
+    <p>
+      Already have an account?
+      <a href="login.html">Login</a>
+    </p>
+  </div>
+
+  <!-- Firebase and Signup Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    // Firebase configuration (same as in login.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCm6lwEyebQLixzhetCb_CS77DU42y1bNc",
+      authDomain: "login-751a9.firebaseapp.com",
+      projectId: "login-751a9",
+      storageBucket: "login-751a9.firebasestorage.app",
+      messagingSenderId: "147563392596",
+      appId: "1:147563392596:web:042b136664dd39a11087c1",
+      measurementId: "G-CWB35NPTYC"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Signup form submission
+    document.getElementById("signup-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById("signup-name").value;
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Save additional user data in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          name: fullName,
+          email: email,
+          createdAt: new Date()
+        });
+
+        alert("Signup successful! Please log in.");
+        window.location.href = "login.html";
+      } catch (error) {
+        document.getElementById("signup-error-message").textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>
